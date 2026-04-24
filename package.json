@@ -1,0 +1,21 @@
+{
+  "name": "arc-name-service",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "jsonfile": "^6.1.0",
+    "rollup": "^4.40.0"
+  },
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "dev:api": "npm run build -w @arc/names && npm run dev -w @arc/names-api",
+    "dev:web": "npm run build -w @arc/names && npm run dev -w @arc/names-web",
+    "build:sdk": "npm run build -w @arc/names",
+    "build:contracts": "npm run build -w @arc/contracts"
+  }
+}

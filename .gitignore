@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+node_modules
+dist
+.next
+coverage
+artifacts
+cache
+typechain-types
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
