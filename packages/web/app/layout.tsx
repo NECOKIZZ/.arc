@@ -22,7 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <header className="nav">
             <Link href="/" style={{ textDecoration: "none" }}>
               <div className="nav-brand">
-                <span className="text-accent" style={{ fontSize: "2.2em", lineHeight: 0, display: "inline-flex", alignItems: "center", marginRight: "-0.05em" }}>.</span>arc
+                <span className="text-accent" style={{ fontSize: "2.2em", lineHeight: 1, display: "inline-flex", alignItems: "center", verticalAlign: "middle", marginRight: "-0.05em" }}>.</span>arc
                 <span className="badge badge-network"><span className="dot dot-blue" /> Testnet</span>
               </div>
             </Link>
