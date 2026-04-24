@@ -1,6 +1,6 @@
 "use client";
 
-import { ARCNames, normalizeName, ANS_REGISTRY_ADDRESSES, ANS_USDC_ADDRESSES, ANS_RPC_URLS, ANS_EXPLORER_URLS, ANS_REGISTRY_ABI, USDC_ERC20_ABI } from "@arc/names";
+import { ARCNames, normalizeName, ANS_REGISTRY_ADDRESSES, ANS_USDC_ADDRESSES, ANS_RPC_URLS, ANS_EXPLORER_URLS, ANS_REGISTRY_ABI, USDC_ERC20_ABI } from "@arcnames/sdk";
 import { BrowserProvider, Contract, formatUnits, isAddress } from "ethers";
 import { useEffect, useMemo, useState } from "react";
 import { useWallet } from "../wallet-context";
