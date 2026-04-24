@@ -19,7 +19,7 @@ import { ARCNames } from "@arc/names";
 
 const ans = new ARCNames({
   rpcUrl: "https://rpc.testnet.arc.network",
-  registryAddress: "0xaDe3b1ae4C5831163Fe8e9727645e2416DD83AD2",
+  registryAddress: "0xf5e0E328119D16c75Fb4a001282a3a7b733EF6db",
 });
 
 // Forward lookup: name → address
@@ -48,7 +48,7 @@ const signer = await provider.getSigner();
 
 const ans = new ARCNames({
   rpcUrl: "https://rpc.testnet.arc.network",
-  registryAddress: "0xaDe3b1ae4C5831163Fe8e9727645e2416DD83AD2",
+  registryAddress: "0xf5e0E328119D16c75Fb4a001282a3a7b733EF6db",
   signer,
 });
 
@@ -144,7 +144,7 @@ function AddressInput({ onResolved }) {
 
   const ans = useMemo(() => new ARCNames({
     rpcUrl: "https://rpc.testnet.arc.network",
-    registryAddress: "0xaDe3b1ae4C5831163Fe8e9727645e2416DD83AD2",
+    registryAddress: "0xf5e0E328119D16c75Fb4a001282a3a7b733EF6db",
   }), []);
 
   async function handleChange(value) {
@@ -195,13 +195,13 @@ function AddressInput({ onResolved }) {
 
 | Network | Registry | USDC |
 |---|---|---|
-| Arc Testnet (5042002) | `0xaDe3b1ae4C5831163Fe8e9727645e2416DD83AD2` | `0x3600000000000000000000000000000000000000` |
+| Arc Testnet (5042002) | `0xf5e0E328119D16c75Fb4a001282a3a7b733EF6db` | `0x3600000000000000000000000000000000000000` |
 
 ---
 
 ## 7. Key Constraints
 
-- Names are **3–32 characters**, lowercase alphanumeric only (`a-z`, `0-9`)
+- Names are **3–32 characters**, lowercase alphanumeric and hyphens (`a-z`, `0-9`, `-`), no leading/trailing hyphens
 - Names ending in `.arc` are automatically normalized (the suffix is stripped internally)
 - Registration costs **5 USDC/year** (standard) or **50 USDC/year** (4 chars or fewer)
 - Names expire after 1 year and have a 30-day grace period

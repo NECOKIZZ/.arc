@@ -1,30 +1,17 @@
 "use client";
 
-import { ARCNames, normalizeName } from "@arc/names";
+import { ARCNames, normalizeName, ANS_REGISTRY_ADDRESSES, ANS_USDC_ADDRESSES, ANS_RPC_URLS, ANS_EXPLORER_URLS, ANS_REGISTRY_ABI, USDC_ERC20_ABI } from "@arc/names";
 import { BrowserProvider, Contract, formatUnits, isAddress } from "ethers";
 import { useEffect, useMemo, useState } from "react";
 import { useWallet } from "../wallet-context";
 
 const ARC_CHAIN_ID = Number(process.env.NEXT_PUBLIC_ARC_CHAIN_ID || "5042002");
-const ARC_CHAIN_ID_HEX = `0x${ARC_CHAIN_ID.toString(16)}`;
-const ARC_RPC_URL = process.env.NEXT_PUBLIC_ARC_RPC_URL || "https://rpc.testnet.arc.network";
+const ARC_RPC_URL = process.env.NEXT_PUBLIC_ARC_RPC_URL || ANS_RPC_URLS[ARC_CHAIN_ID] || "https://rpc.testnet.arc.network";
 const REGISTRY_ADDRESS =
   process.env.NEXT_PUBLIC_ANS_REGISTRY_ADDRESS ||
-  process.env.NEXT_PUBLIC_REGISTRY_ADDRESS ||
-  "0xaDe3b1ae4C5831163Fe8e9727645e2416DD83AD2";
-const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_TOKEN_ADDRESS || "0x3600000000000000000000000000000000000000";
-const EXPLORER_BASE_URL = process.env.NEXT_PUBLIC_ARC_EXPLORER_URL || "https://testnet.arcscan.app/tx/";
-
-const erc20Abi = [
-  "function allowance(address owner, address spender) view returns (uint256)",
-  "function approve(address spender, uint256 amount) returns (bool)",
-  "function balanceOf(address owner) view returns (uint256)"
-] as const;
-
-const registryAbi = [
-  "function getOwnedLabels(address wallet) view returns (string[] memory)",
-  "function quotePrice(string rawLabel, uint256 yearsCount) view returns (uint256)"
-] as const;
+  ANS_REGISTRY_ADDRESSES[ARC_CHAIN_ID] || "";
+const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_TOKEN_ADDRESS || ANS_USDC_ADDRESSES[ARC_CHAIN_ID] || "";
+const EXPLORER_BASE_URL = process.env.NEXT_PUBLIC_ARC_EXPLORER_URL || `${ANS_EXPLORER_URLS[ARC_CHAIN_ID]}/tx/` || "https://testnet.arcscan.app/tx/";
 
 type TxHistoryItem = { action: string; name: string; txHash: string; at: number };
 
@@ -54,7 +41,7 @@ export default function DashboardPage() {
   async function loadOwnedNames(owner: string) {
     try {
       const provider = new BrowserProvider(window.ethereum as any);
-      const registry = new Contract(REGISTRY_ADDRESS, registryAbi, provider);
+      const registry = new Contract(REGISTRY_ADDRESS, ANS_REGISTRY_ABI, provider);
       const raw = await registry.getOwnedLabels(owner);
       const owned = normalizeOwnedLabels(raw);
       setNames(owned);
@@ -103,8 +90,8 @@ export default function DashboardPage() {
       const signer = await provider.getSigner();
       const owner = await signer.getAddress();
 
-      const usdc = new Contract(USDC_ADDRESS, erc20Abi, signer);
-      const registry = new Contract(REGISTRY_ADDRESS, registryAbi, signer);
+      const usdc = new Contract(USDC_ADDRESS, USDC_ERC20_ABI, signer);
+      const registry = new Contract(REGISTRY_ADDRESS, ANS_REGISTRY_ABI, signer);
       const quote = (await registry.quotePrice(selectedLabel, 1)) as bigint;
       const balance = (await usdc.balanceOf(owner)) as bigint;
       if (balance < quote) {
@@ -157,42 +144,40 @@ export default function DashboardPage() {
 
   return (
     <main className="fade-in">
-      {/* Wallet */}
-      <section className="card mb">
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.5rem" }}>
-          <div>
-            <h2>Dashboard</h2>
-            {wallet ? (
-              <p className="text-sm text-secondary mt-sm">
-                <span className="font-mono">{wallet.slice(0, 6)}...{wallet.slice(-4)}</span>
-                {onArc
-                  ? <span className="badge badge-network" style={{ marginLeft: 8 }}><span className="dot dot-green" /> Arc Testnet</span>
-                  : <span className="badge badge-warn" style={{ marginLeft: 8 }}><span className="dot dot-yellow" /> Wrong network</span>
-                }
-              </p>
-            ) : (
-              <p className="text-sm text-secondary mt-sm">Connect your wallet to manage names</p>
-            )}
-          </div>
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            {!wallet && (
-              <button type="button" className="btn-primary btn-sm" style={{ width: "auto" }} onClick={connectWallet}>
-                Connect wallet
-              </button>
-            )}
-            {wallet && (
-              <button type="button" className="btn-sm" style={{ width: "auto" }} onClick={() => loadOwnedNames(wallet)}>
-                Refresh
-              </button>
-            )}
-            {wallet && !onArc && (
-              <button type="button" className="btn-sm" style={{ width: "auto" }} onClick={switchToArc}>
-                Switch to Arc
-              </button>
-            )}
-          </div>
+      {/* Header */}
+      <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
+        <h1 style={{ fontSize: "2.5rem" }}>Dashboard</h1>
+        <p className="text-secondary mt-sm" style={{ fontSize: "1.05rem" }}>
+          {wallet ? (
+            <>
+              <span className="font-mono">{wallet.slice(0, 6)}...{wallet.slice(-4)}</span>{" "}
+              {onArc
+                ? <span className="badge badge-network"><span className="dot dot-blue" /> Arc</span>
+                : <span className="badge badge-warn"><span className="dot dot-yellow" /> Wrong network</span>
+              }
+            </>
+          ) : (
+            "Connect your wallet to manage your names"
+          )}
+        </p>
+        <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center", marginTop: "1rem" }}>
+          {!wallet && (
+            <button type="button" className="btn-primary" style={{ width: "auto" }} onClick={connectWallet}>
+              Connect Wallet
+            </button>
+          )}
+          {wallet && (
+            <button type="button" className="btn-sm" style={{ width: "auto" }} onClick={() => loadOwnedNames(wallet)}>
+              Refresh
+            </button>
+          )}
+          {wallet && !onArc && (
+            <button type="button" className="btn-sm" style={{ width: "auto" }} onClick={switchToArc}>
+              Switch to Arc
+            </button>
+          )}
         </div>
-      </section>
+      </div>
 
       {/* Messages */}
       {error && <div className="msg msg-error mb">{error}</div>}
@@ -207,7 +192,7 @@ export default function DashboardPage() {
       {names.length > 0 ? (
         <>
           <section className="card mb">
-            <span className="label">Select a name to manage</span>
+            <label className="label">Select a name to manage</label>
             <select value={selectedName} onChange={(e) => setSelectedName(e.target.value)}>
               {names.map((value) => (
                 <option key={value} value={value}>{value}</option>
@@ -217,11 +202,10 @@ export default function DashboardPage() {
 
           {selectedLabel && (
             <>
-              {/* Quick actions */}
               <div className="grid grid-2">
                 <section className="card">
                   <h3 className="mb">Renew</h3>
-                  <p className="text-xs text-secondary mb">Extend registration for another year. Requires USDC approval.</p>
+                  <p className="text-xs text-secondary mb">Extend for another year. Requires USDC.</p>
                   <button type="button" onClick={renewName} disabled={busy || !canManage}>
                     {busy ? <><span className="spinner" /> Renewing...</> : `Renew ${selectedLabel}.arc`}
                   </button>
@@ -229,16 +213,16 @@ export default function DashboardPage() {
 
                 <section className="card">
                   <h3 className="mb">Primary name</h3>
-                  <p className="text-xs text-secondary mb">Set this name as your reverse-lookup identity.</p>
+                  <p className="text-xs text-secondary mb">Set as your reverse-lookup identity.</p>
                   <button type="button" onClick={setPrimary} disabled={busy || !canManage}>
                     {busy ? <><span className="spinner" /> Setting...</> : "Set as primary"}
                   </button>
                 </section>
               </div>
 
-              <section className="card mt">
+              <section className="card" style={{ marginTop: "0.75rem" }}>
                 <h3 className="mb">Update resolved address</h3>
-                <p className="text-xs text-secondary mb">Change which wallet address this name points to.</p>
+                <p className="text-xs text-secondary mb">Change the wallet address this name points to.</p>
                 <div style={{ display: "flex", gap: "0.5rem" }}>
                   <input
                     value={newResolvedAddress}
@@ -251,9 +235,9 @@ export default function DashboardPage() {
                 </div>
               </section>
 
-              <section className="card mt">
+              <section className="card" style={{ marginTop: "0.75rem" }}>
                 <h3 className="mb">Transfer ownership</h3>
-                <p className="text-xs text-secondary mb">Send this name to a different wallet. You will lose control.</p>
+                <p className="text-xs text-secondary mb">Send this name to another wallet. You will lose control.</p>
                 <div style={{ display: "flex", gap: "0.5rem" }}>
                   <input
                     value={newOwnerAddress}
@@ -266,9 +250,9 @@ export default function DashboardPage() {
                 </div>
               </section>
 
-              <section className="card mt">
+              <section className="card" style={{ marginTop: "0.75rem" }}>
                 <h3 className="mb">Release name</h3>
-                <p className="text-xs text-secondary mb">Permanently give up this name. It becomes available for anyone to register.</p>
+                <p className="text-xs text-secondary mb">Permanently give up this name. Anyone can then register it.</p>
                 <button type="button" className="btn-danger" onClick={releaseName} disabled={busy || !canManage}>
                   Release {selectedLabel}.arc
                 </button>
@@ -277,11 +261,15 @@ export default function DashboardPage() {
           )}
         </>
       ) : wallet ? (
-        <div className="card text-center" style={{ padding: "2.5rem 1.5rem" }}>
-          <p className="text-secondary">You don&apos;t own any <strong>.arc</strong> names yet.</p>
-          <p className="text-xs text-secondary mt-sm">
-            <a href="/register">Register one &rarr;</a>
-          </p>
+        <div className="container-narrow">
+          <section className="card card-glow text-center" style={{ padding: "3.5rem 1.5rem" }}>
+            <p style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>&#x1F3F7;&#xFE0F;</p>
+            <p style={{ fontSize: "1.1rem", fontWeight: 600 }}>No .arc names yet</p>
+            <p className="text-secondary text-sm mt-sm">Claim your identity on Arc.</p>
+            <a href="/register" style={{ display: "inline-block", marginTop: "1.25rem" }}>
+              <button type="button" className="btn-primary btn-lg" style={{ width: "auto" }}>Register a name</button>
+            </a>
+          </section>
         </div>
       ) : null}
 

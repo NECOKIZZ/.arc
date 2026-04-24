@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { WalletProvider } from "./wallet-context";
+import NavLinks from "./nav-links";
 
 export const metadata: Metadata = {
   title: "ARC Name Service",
@@ -14,22 +15,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <WalletProvider>
-          <div className="container">
-            <header className="nav">
+          <header className="nav">
+            <Link href="/" style={{ textDecoration: "none" }}>
               <div className="nav-brand">
-                <span className="text-accent">.</span>arc
-                <span className="badge badge-network"><span className="dot dot-green" /> Testnet</span>
+                <span className="text-accent" style={{ fontSize: "2.2em", lineHeight: 0, display: "inline-flex", alignItems: "center", marginRight: "-0.05em" }}>.</span>arc
+                <span className="badge badge-network"><span className="dot dot-blue" /> Testnet</span>
               </div>
-              <nav className="nav-links">
-                <Link href="/">Home</Link>
-                <Link href="/register">Register</Link>
-                <Link href="/dashboard">Dashboard</Link>
-              </nav>
-            </header>
+            </Link>
+            <NavLinks />
+          </header>
+          <div className="container">
             {children}
           </div>
         </WalletProvider>

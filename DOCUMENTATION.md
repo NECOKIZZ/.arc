@@ -256,14 +256,14 @@ import { ARCNames, normalizeName } from "@arc/names";
 // Read-only (no signer needed)
 const ans = new ARCNames({
   rpcUrl: "https://rpc.testnet.arc.network",
-  registryAddress: "0xaDe3b1ae4C5831163Fe8e9727645e2416DD83AD2",
+  registryAddress: "0xf5e0E328119D16c75Fb4a001282a3a7b733EF6db",
   cacheTimeout: 60000, // optional, default 60s
 });
 
 // Read + Write (signer required)
 const ansWrite = new ARCNames({
   rpcUrl: "https://rpc.testnet.arc.network",
-  registryAddress: "0xaDe3b1ae4C5831163Fe8e9727645e2416DD83AD2",
+  registryAddress: "0xf5e0E328119D16c75Fb4a001282a3a7b733EF6db",
   signer: ethersJsSigner,
 });
 ```
@@ -768,7 +768,7 @@ arc-name-service/
 
 | Contract | Address |
 |---|---|
-| **ARCNameRegistry** | `0xaDe3b1ae4C5831163Fe8e9727645e2416DD83AD2` |
+| **ARCNameRegistry** | `0xf5e0E328119D16c75Fb4a001282a3a7b733EF6db` |
 | **USDC Token** | `0x3600000000000000000000000000000000000000` |
 
 ### Network Details
@@ -786,4 +786,5 @@ arc-name-service/
 |---|---|---|
 | `0xF317e6A747595F143Fc400D4fE0E866595731D5A` | Deprecated | First deployment, had bugs in renew/release check ordering |
 | `0xae91b30E833ea6f6248D325b776fE1C55D7248D7` | Deprecated | Second deployment, allowed hyphens in names |
-| `0xaDe3b1ae4C5831163Fe8e9727645e2416DD83AD2` | **Active** | Current deployment, alphanumeric only |
+| `0xaDe3b1ae4C5831163Fe8e9727645e2416DD83AD2` | Deprecated | Third deployment, alphanumeric only (no hyphens) |
+| `0xf5e0E328119D16c75Fb4a001282a3a7b733EF6db` | **Active** | Current deployment, alphanumeric + hyphens re-enabled |

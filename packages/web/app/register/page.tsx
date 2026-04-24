@@ -1,6 +1,6 @@
 "use client";
 
-import { ARCNames, normalizeName } from "@arc/names";
+import { ARCNames, normalizeName, ANS_REGISTRY_ADDRESSES, ANS_USDC_ADDRESSES, ANS_RPC_URLS, ANS_REGISTRY_ABI, USDC_ERC20_ABI } from "@arc/names";
 import {
   BrowserProvider,
   Contract,
@@ -12,31 +12,25 @@ import { useEffect, useMemo, useState } from "react";
 import { useWallet } from "../wallet-context";
 
 const ARC_CHAIN_ID = Number(process.env.NEXT_PUBLIC_ARC_CHAIN_ID || "5042002");
-const ARC_CHAIN_ID_HEX = `0x${ARC_CHAIN_ID.toString(16)}`;
-const ARC_RPC_URL = process.env.NEXT_PUBLIC_ARC_RPC_URL || "https://rpc.testnet.arc.network";
+const ARC_RPC_URL = process.env.NEXT_PUBLIC_ARC_RPC_URL || ANS_RPC_URLS[ARC_CHAIN_ID] || "https://rpc.testnet.arc.network";
 const REGISTRY_ADDRESS =
   process.env.NEXT_PUBLIC_ANS_REGISTRY_ADDRESS ||
-  process.env.NEXT_PUBLIC_REGISTRY_ADDRESS ||
-  "0xaDe3b1ae4C5831163Fe8e9727645e2416DD83AD2";
-const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_TOKEN_ADDRESS || "0x3600000000000000000000000000000000000000";
-
-const erc20Abi = [
-  "function allowance(address owner, address spender) view returns (uint256)",
-  "function approve(address spender, uint256 amount) returns (bool)",
-  "function balanceOf(address owner) view returns (uint256)"
-] as const;
-
-const registryAbi = [
-  "function isAvailable(string rawLabel) view returns (bool)",
-  "function quotePrice(string rawLabel, uint256 yearsCount) view returns (uint256)",
-  "function commitRevealRequired() view returns (bool)"
-] as const;
+  ANS_REGISTRY_ADDRESSES[ARC_CHAIN_ID] || "";
+const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_TOKEN_ADDRESS || ANS_USDC_ADDRESSES[ARC_CHAIN_ID] || "";
 
 type FlowStep = "idle" | "balance" | "approve" | "register" | "done" | "failed";
+type NameType = "human" | "agent" | "payment";
+
+const NAME_TYPES: { type: NameType; emoji: string; label: string; desc: string; suffix: string }[] = [
+  { type: "human", emoji: "\u{1F9D1}", label: "Human", desc: "Personal identity", suffix: "" },
+  { type: "agent", emoji: "\u{1F916}", label: "AI Agent", desc: "Requires -agent suffix", suffix: "-agent" },
+  { type: "payment", emoji: "\u{1F4B8}", label: "Payment App", desc: "Requires -usdc suffix", suffix: "-usdc" },
+];
 
 export default function RegisterPage() {
   const { wallet, chainId, onArc, connect: connectWallet, switchToArc, walletError, clearWalletError } = useWallet();
-  const [name, setName] = useState("");
+  const [nameType, setNameType] = useState<NameType>("human");
+  const [rawName, setRawName] = useState("");
   const [loading, setLoading] = useState(false);
   const [available, setAvailable] = useState<boolean | null>(null);
   const [checkedName, setCheckedName] = useState("");
@@ -48,9 +42,13 @@ export default function RegisterPage() {
   const [showDiag, setShowDiag] = useState(false);
   const [diagnostics, setDiagnostics] = useState<string[]>([]);
 
+  const selectedType = NAME_TYPES.find((t) => t.type === nameType)!;
+  const fullName = rawName.trim() ? `${rawName.trim().toLowerCase().replace(/\.arc$/, "")}${selectedType.suffix}` : "";
+  const displayName = fullName ? `${fullName}.arc` : "";
+
   const canRegister = useMemo(() => {
-    return Boolean(name.trim() && wallet && onArc && REGISTRY_ADDRESS && isAddress(REGISTRY_ADDRESS));
-  }, [name, wallet, onArc]);
+    return Boolean(fullName && wallet && onArc && REGISTRY_ADDRESS && isAddress(REGISTRY_ADDRESS));
+  }, [fullName, wallet, onArc]);
 
   function pushTxLog(message: string) {
     setTxLogs((prev) => [`${new Date().toLocaleTimeString()} ${message}`, ...prev].slice(0, 25));
@@ -76,8 +74,8 @@ export default function RegisterPage() {
       try {
         const provider = new BrowserProvider(window.ethereum as any);
         const signer = await provider.getSigner();
-        const usdc = new Contract(USDC_ADDRESS, erc20Abi, signer);
-        const registry = new Contract(REGISTRY_ADDRESS, registryAbi, signer);
+        const usdc = new Contract(USDC_ADDRESS, USDC_ERC20_ABI, signer);
+        const registry = new Contract(REGISTRY_ADDRESS, ANS_REGISTRY_ABI, signer);
         const balance = (await usdc.balanceOf(wallet)) as bigint;
         const quote = (await registry.quotePrice("random", 1)) as bigint;
         const allowance = (await usdc.allowance(wallet, REGISTRY_ADDRESS)) as bigint;
@@ -101,6 +99,7 @@ export default function RegisterPage() {
   }, [walletError, clearWalletError]);
 
   async function checkAvailability() {
+    if (!fullName) return;
     setLoading(true);
     setError(null);
     setAvailable(null);
@@ -110,7 +109,7 @@ export default function RegisterPage() {
       if (!REGISTRY_ADDRESS || !isAddress(REGISTRY_ADDRESS)) {
         throw new Error("Registry address is not configured.");
       }
-      const label = normalizeName(name);
+      const label = normalizeName(fullName);
       const ans = new ARCNames({
         rpcUrl: ARC_RPC_URL,
         registryAddress: REGISTRY_ADDRESS
@@ -142,16 +141,16 @@ export default function RegisterPage() {
       const signer = await provider.getSigner();
       const owner = await signer.getAddress();
 
-      const label = normalizeName(name);
+      const label = normalizeName(fullName);
       const sdk = new ARCNames({
         rpcUrl: ARC_RPC_URL,
         registryAddress: REGISTRY_ADDRESS,
         signer
       });
-      const registry = new Contract(REGISTRY_ADDRESS, registryAbi, signer);
+      const registry = new Contract(REGISTRY_ADDRESS, ANS_REGISTRY_ABI, signer);
 
       pushTxLog("Checking USDC balance");
-      const usdc = new Contract(USDC_ADDRESS, erc20Abi, signer);
+      const usdc = new Contract(USDC_ADDRESS, USDC_ERC20_ABI, signer);
       const balance = (await usdc.balanceOf(owner)) as bigint;
       const quote = (await registry.quotePrice(label, 1)) as bigint;
       if (balance < quote) {
@@ -196,150 +195,184 @@ export default function RegisterPage() {
 
   return (
     <main className="fade-in">
-      {/* Wallet connection */}
-      <section className="card mb">
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.5rem" }}>
-          <div>
-            <h2>Wallet</h2>
-            {wallet ? (
-              <p className="text-sm text-secondary mt-sm">
-                <span className="font-mono">{wallet.slice(0, 6)}...{wallet.slice(-4)}</span>
-                {onArc
-                  ? <span className="badge badge-network" style={{ marginLeft: 8 }}><span className="dot dot-green" /> Arc Testnet</span>
-                  : <span className="badge badge-warn" style={{ marginLeft: 8 }}><span className="dot dot-yellow" /> Wrong network</span>
-                }
-              </p>
-            ) : (
-              <p className="text-sm text-secondary mt-sm">Not connected</p>
-            )}
+      {/* Header */}
+      <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
+        <h1 style={{ fontSize: "2.5rem" }}>Claim your <span className="text-accent">.arc</span> name</h1>
+        <p className="text-secondary mt-sm" style={{ fontSize: "1.05rem" }}>
+          Choose what you&apos;re registering, pick a name, and you&apos;re live on Arc.
+        </p>
+      </div>
+
+      <div className="container-narrow">
+        {/* Wallet bar */}
+        <section className="card mb" style={{ padding: "1rem 1.5rem" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.5rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              {wallet ? (
+                <>
+                  <span className="font-mono text-sm">{wallet.slice(0, 6)}...{wallet.slice(-4)}</span>
+                  {onArc
+                    ? <span className="badge badge-network"><span className="dot dot-blue" /> Arc</span>
+                    : <span className="badge badge-warn"><span className="dot dot-yellow" /> Wrong network</span>
+                  }
+                </>
+              ) : (
+                <span className="text-sm text-secondary">Wallet not connected</span>
+              )}
+            </div>
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+              {!wallet && (
+                <button type="button" className="btn-primary btn-sm" style={{ width: "auto" }} onClick={connectWallet}>
+                  Connect Wallet
+                </button>
+              )}
+              {wallet && !onArc && (
+                <button type="button" className="btn-sm" style={{ width: "auto" }} onClick={switchToArc}>
+                  Switch to Arc
+                </button>
+              )}
+            </div>
           </div>
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            {!wallet && (
-              <button type="button" className="btn-primary btn-sm" style={{ width: "auto" }} onClick={connectWallet}>
-                Connect wallet
-              </button>
-            )}
-            {wallet && !onArc && (
-              <button type="button" className="btn-sm" style={{ width: "auto" }} onClick={switchToArc}>
-                Switch to Arc
-              </button>
-            )}
-          </div>
+        </section>
+
+        {/* Type Selector */}
+        <div className="type-selector">
+          {NAME_TYPES.map((t) => (
+            <div
+              key={t.type}
+              className={`type-option ${nameType === t.type ? "selected" : ""}`}
+              onClick={() => { setNameType(t.type); setAvailable(null); setCheckedName(""); setError(null); }}
+            >
+              <span className="type-emoji">{t.emoji}</span>
+              <span className="type-label">{t.label}</span>
+              <span className="type-desc">{t.desc}</span>
+            </div>
+          ))}
         </div>
-      </section>
 
-      {/* Search + register */}
-      <section className="card">
-        <h1>Register a <span className="text-accent">.arc</span> name</h1>
-        <p className="text-secondary text-sm mt-sm mb">Search for a name, then register it in one flow.</p>
-
-        <div style={{ display: "flex", gap: "0.5rem" }} className="mt">
-          <input
-            value={name}
-            onChange={(e) => { setName(e.target.value); setAvailable(null); setCheckedName(""); }}
-            placeholder="Enter a name, e.g. david"
-            onKeyDown={(e) => { if (e.key === "Enter" && name.trim()) checkAvailability(); }}
-          />
-          <button
-            type="button"
-            onClick={checkAvailability}
-            disabled={loading || !name.trim()}
-            style={{ width: "auto", flexShrink: 0 }}
-          >
-            {loading && flowStep === "idle" ? <><span className="spinner" /> Checking</> : "Search"}
-          </button>
-        </div>
-
-        {/* Availability result */}
-        {available !== null && checkedName && (
-          <div className={`msg mt ${available ? "msg-success" : "msg-info"}`}>
-            {available
-              ? <><span>&#10003;</span> <span><strong>{checkedName}</strong> is available!</span></>
-              : <><span>&#10005;</span> <span><strong>{checkedName}</strong> is already taken.</span></>
-            }
-          </div>
-        )}
-
-        {/* Register button */}
-        {available && (
-          <div className="mt">
-            {/* Step indicator */}
-            {flowStep !== "idle" && flowStep !== "failed" && (
-              <div className="steps">
-                {["Check balance", "Approve USDC", "Register", "Done"].map((label, i) => (
-                  <span key={label}>
-                    {i > 0 && <span className="step-line" />}
-                    <span className={`step ${i < stepIndex ? "done" : i === stepIndex ? "active" : ""}`}>
-                      <span className="step-num">{i < stepIndex ? "\u2713" : i + 1}</span>
-                      <span>{label}</span>
-                    </span>
-                  </span>
-                ))}
-              </div>
-            )}
-
+        {/* Name input */}
+        <section className="card card-glow">
+          <label className="label">
+            {nameType === "human" ? "Choose your name" : nameType === "agent" ? "Agent name" : "App name"}
+          </label>
+          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+            <div style={{ flex: 1, position: "relative" }}>
+              <input
+                className="input-lg"
+                value={rawName}
+                onChange={(e) => { setRawName(e.target.value); setAvailable(null); setCheckedName(""); }}
+                placeholder={nameType === "human" ? "alice" : nameType === "agent" ? "mybot" : "payflow"}
+                onKeyDown={(e) => { if (e.key === "Enter" && fullName) checkAvailability(); }}
+              />
+            </div>
             <button
               type="button"
               className="btn-primary"
-              onClick={approveAndRegister}
-              disabled={loading || !canRegister}
+              onClick={checkAvailability}
+              disabled={loading || !fullName}
+              style={{ width: "auto", flexShrink: 0, padding: "0.85rem 1.5rem" }}
             >
-              {loading
-                ? <><span className="spinner" /> Processing...</>
-                : `Register ${checkedName}`
+              {loading && flowStep === "idle" ? <><span className="spinner" /> Checking</> : "Search"}
+            </button>
+          </div>
+
+          {/* Preview */}
+          {fullName && (
+            <div style={{ marginTop: "0.75rem", padding: "0.6rem 1rem", background: "var(--cream)", borderRadius: "var(--radius-sm)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <span className="text-xs text-secondary">Will register as:</span>
+              <span style={{ fontWeight: 700, fontFamily: "'SF Mono', 'Fira Code', monospace", fontSize: "1rem" }}>
+                {displayName}
+              </span>
+              {nameType === "agent" && <span className="badge badge-agent">Agent</span>}
+              {nameType === "payment" && <span className="badge badge-usdc">Payment</span>}
+            </div>
+          )}
+
+          {/* Availability result */}
+          {available !== null && checkedName && (
+            <div className={`msg mt ${available ? "msg-success" : "msg-info"}`}>
+              {available
+                ? <><span>&#10003;</span> <span><strong>{checkedName}</strong> is available!</span></>
+                : <><span>&#10005;</span> <span><strong>{checkedName}</strong> is already taken.</span></>
               }
-            </button>
+            </div>
+          )}
 
-            {!canRegister && !loading && (
-              <p className="text-xs text-secondary mt-sm">
-                {!wallet ? "Connect your wallet to continue." : !onArc ? "Switch to Arc Testnet to continue." : ""}
-              </p>
-            )}
-          </div>
-        )}
+          {/* Register button */}
+          {available && (
+            <div className="mt-lg">
+              {flowStep !== "idle" && flowStep !== "failed" && (
+                <div className="steps">
+                  {["Balance", "Approve", "Register", "Done"].map((label, i) => (
+                    <span key={label}>
+                      {i > 0 && <span className="step-line" />}
+                      <span className={`step ${i < stepIndex ? "done" : i === stepIndex ? "active" : ""}`}>
+                        <span className="step-num">{i < stepIndex ? "\u2713" : i + 1}</span>
+                        <span>{label}</span>
+                      </span>
+                    </span>
+                  ))}
+                </div>
+              )}
 
-        {/* Messages */}
-        {error && <div className="msg msg-error mt">{error}</div>}
-        {success && (
-          <div className="msg msg-success mt">
-            Registered <strong>{checkedName}</strong> successfully!
-            <a
-              href={`https://testnet.arcscan.app/tx/${success}`}
-              target="_blank"
-              rel="noreferrer"
-              style={{ marginLeft: 4 }}
-            >
-              View tx &rarr;
-            </a>
-          </div>
-        )}
+              <button
+                type="button"
+                className="btn-primary btn-lg"
+                onClick={approveAndRegister}
+                disabled={loading || !canRegister}
+              >
+                {loading
+                  ? <><span className="spinner" /> Processing...</>
+                  : `Register ${checkedName}`
+                }
+              </button>
 
-        {/* Collapsible logs */}
-        {txLogs.length > 0 && (
+              {!canRegister && !loading && (
+                <p className="text-xs text-secondary mt-sm" style={{ textAlign: "center" }}>
+                  {!wallet ? "Connect your wallet to continue." : !onArc ? "Switch to Arc Testnet to continue." : ""}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Messages */}
+          {error && <div className="msg msg-error mt">{error}</div>}
+          {success && (
+            <div className="msg msg-success mt">
+              Registered <strong>{checkedName}</strong> successfully!{" "}
+              <a href={`https://testnet.arcscan.app/tx/${success}`} target="_blank" rel="noreferrer">
+                View tx &rarr;
+              </a>
+            </div>
+          )}
+
+          {/* Collapsible logs */}
+          {txLogs.length > 0 && (
+            <div className="mt">
+              <button type="button" className="collapsible-trigger" onClick={() => setShowLogs(!showLogs)}>
+                {showLogs ? "\u25BE" : "\u25B8"} Transaction log ({txLogs.length})
+              </button>
+              {showLogs && (
+                <ul className="log-list">
+                  {txLogs.map((line, idx) => <li key={`${line}-${idx}`}>{line}</li>)}
+                </ul>
+              )}
+            </div>
+          )}
+
+          {/* Collapsible diagnostics */}
           <div className="mt">
-            <button type="button" className="collapsible-trigger" onClick={() => setShowLogs(!showLogs)}>
-              {showLogs ? "\u25BE" : "\u25B8"} Transaction log ({txLogs.length})
+            <button type="button" className="collapsible-trigger" onClick={() => { setShowDiag(!showDiag); if (!showDiag) runDiagnostics(); }}>
+              {showDiag ? "\u25BE" : "\u25B8"} Diagnostics
             </button>
-            {showLogs && (
+            {showDiag && (
               <ul className="log-list">
-                {txLogs.map((line, idx) => <li key={`${line}-${idx}`}>{line}</li>)}
+                {diagnostics.map((line, idx) => <li key={`${line}-${idx}`}>{line}</li>)}
               </ul>
             )}
           </div>
-        )}
-
-        {/* Collapsible diagnostics */}
-        <div className="mt">
-          <button type="button" className="collapsible-trigger" onClick={() => { setShowDiag(!showDiag); if (!showDiag) runDiagnostics(); }}>
-            {showDiag ? "\u25BE" : "\u25B8"} Diagnostics
-          </button>
-          {showDiag && (
-            <ul className="log-list">
-              {diagnostics.map((line, idx) => <li key={`${line}-${idx}`}>{line}</li>)}
-            </ul>
-          )}
-        </div>
-      </section>
+        </section>
+      </div>
     </main>
   );
 }

@@ -24,32 +24,43 @@ export default async function ProfilePage({ params }: { params: Promise<{ name: 
   const displayName = name.endsWith(".arc") ? name : `${name}.arc`;
   const initial = name.replace(/\.arc$/, "").charAt(0).toUpperCase();
 
+  const isAgent = displayName.includes("-agent.");
+  const isPayment = displayName.includes("-usdc.");
+
   if (!profile) {
     return (
       <main className="fade-in">
-        <section className="card text-center" style={{ padding: "3rem 1.5rem" }}>
-          <div className="profile-avatar" style={{ margin: "0 auto 1rem" }}>?</div>
-          <h1>{displayName}</h1>
-          <p className="text-secondary mt-sm">This name hasn&apos;t been registered yet, or the API is unavailable.</p>
-          <div style={{ marginTop: "1.5rem" }}>
-            <a href="/register">
-              <button type="button" className="btn-primary" style={{ maxWidth: 260 }}>Register this name</button>
-            </a>
-          </div>
-        </section>
+        <div className="container-narrow">
+          <section className="card card-glow text-center" style={{ padding: "3.5rem 1.5rem" }}>
+            <div className="profile-avatar" style={{ margin: "0 auto 1rem", opacity: 0.5 }}>?</div>
+            <h1 style={{ fontSize: "1.75rem" }}>{displayName}</h1>
+            <p className="text-secondary mt-sm">This name hasn&apos;t been registered yet, or the API is unavailable.</p>
+            <div style={{ marginTop: "1.5rem" }}>
+              <a href="/register">
+                <button type="button" className="btn-primary btn-lg" style={{ width: "auto" }}>Claim this name</button>
+              </a>
+            </div>
+          </section>
+        </div>
       </main>
     );
   }
 
   return (
     <main className="fade-in">
-      <section className="card" style={{ textAlign: "center", padding: "2.5rem 1.5rem" }}>
+      {/* Profile header */}
+      <div style={{ textAlign: "center", marginBottom: "2rem" }}>
         <div className="profile-avatar" style={{ margin: "0 auto" }}>{initial}</div>
-        <h1>{profile.name}</h1>
-        <p className="text-secondary text-sm mt-sm">Public profile on Arc Testnet</p>
-      </section>
+        <h1 style={{ fontSize: "2.5rem" }}>{profile.name}</h1>
+        <div style={{ display: "flex", justifyContent: "center", gap: "0.5rem", marginTop: "0.75rem" }}>
+          {isAgent && <span className="badge badge-agent">Agent</span>}
+          {isPayment && <span className="badge badge-usdc">Payment App</span>}
+          {!isAgent && !isPayment && <span className="badge badge-network">Identity</span>}
+          <span className="pill"><span className="dot dot-blue" /> Arc Testnet</span>
+        </div>
+      </div>
 
-      <div className="grid grid-2 mt">
+      <div className="grid grid-2 container-narrow" style={{ margin: "0 auto" }}>
         <section className="card">
           <div className="profile-field">
             <span className="profile-label">Resolved address</span>

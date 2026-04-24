@@ -379,9 +379,11 @@ contract ARCNameRegistry is Ownable2Step, Pausable, ReentrancyGuard {
             uint8 ch = uint8(lower[i]);
             bool isLower = ch >= 97 && ch <= 122;
             bool isDigit = ch >= 48 && ch <= 57;
-            if (!(isLower || isDigit)) revert InvalidLabel();
+            bool isHyphen = ch == 45;
+            if (!(isLower || isDigit || isHyphen)) revert InvalidLabel();
             out[i] = lower[i];
         }
+        if (uint8(out[0]) == 45 || uint8(out[len - 1]) == 45) revert InvalidLabel();
 
         return string(out);
     }

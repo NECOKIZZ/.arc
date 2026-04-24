@@ -1,7 +1,7 @@
 {
-  "name": "@arcnames/sdk",
+  "name": "@arcnames/sdk-react",
   "version": "0.2.0",
-  "description": "TypeScript SDK for ARC Name Service — .arc domain resolution, registration, and management on Arc Network",
+  "description": "React hooks for ARC Name Service — useANSResolve, useANSReverse, useANSAvailability",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
@@ -11,11 +11,6 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
-    },
-    "./constants": {
-      "types": "./dist/constants.d.ts",
-      "import": "./dist/constants.js",
-      "require": "./dist/constants.cjs"
     }
   },
   "files": [
@@ -27,30 +22,32 @@
   "keywords": [
     "arc",
     "ans",
+    "react",
+    "hooks",
     "name-service",
-    "domain",
-    "web3",
-    "usdc",
-    "blockchain"
+    "web3"
   ],
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/NECOKIZZ/.arc.git",
-    "directory": "packages/sdk"
+    "directory": "packages/react"
   },
   "scripts": {
-    "build": "tsup src/index.ts src/constants.ts --format esm,cjs --dts",
+    "build": "tsup src/index.ts --format esm,cjs --dts --external react",
     "lint": "tsc --noEmit"
   },
+  "peerDependencies": {
+    "@arcnames/sdk": ">=0.2.0",
+    "react": ">=18.0.0"
+  },
   "dependencies": {
-    "ethers": "^6.13.5",
-    "qrcode": "^1.5.4"
+    "@arcnames/sdk": "file:../sdk"
   },
   "devDependencies": {
     "@types/node": "^22.13.5",
-    "@types/qrcode": "^1.5.5",
-    "rollup": "^4.40.0",
+    "@types/react": "^19.0.10",
+    "react": "^19.0.0",
     "tsup": "^8.4.0",
     "typescript": "^5.8.2"
   }

@@ -1,24 +1,10 @@
 import { Contract, JsonRpcProvider, Signer, isAddress, randomBytes, solidityPackedKeccak256 } from "ethers";
 import QRCode from "qrcode";
+import { ANS_REGISTRY_ABI } from "./constants.js";
+
+export * from "./constants.js";
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
-
-const REGISTRY_ABI = [
-  "function resolve(string rawLabel) view returns (address)",
-  "function reverseResolve(address wallet) view returns (string)",
-  "function isAvailable(string rawLabel) view returns (bool)",
-  "function getRecord(string rawLabel) view returns (address owner, address resolvedAddress, uint64 expiry, bool expired, bool reserved)",
-  "function quotePrice(string rawLabel, uint256 yearsCount) view returns (uint256)",
-  "function commitRevealRequired() view returns (bool)",
-  "function register(string rawLabel, address resolvedAddress)",
-  "function submitCommitment(bytes32 commitment)",
-  "function registerWithCommit(string rawLabel, address resolvedAddress, bytes32 salt)",
-  "function renew(string rawLabel)",
-  "function release(string rawLabel)",
-  "function updateResolvedAddress(string rawLabel, address newAddress)",
-  "function transferName(string rawLabel, address newOwner)",
-  "function setPrimaryName(string rawLabel)"
-] as const;
 
 export type NameInfo = {
   name: string;
@@ -27,6 +13,19 @@ export type NameInfo = {
   expiry: number | null;
   isExpired: boolean;
   isReserved: boolean;
+};
+
+export type ResolveReason = "found" | "not_registered" | "expired" | "reserved" | "invalid_name";
+
+export type ResolveResult = {
+  address: string | null;
+  name: string;
+  reason: ResolveReason;
+};
+
+export type BatchResolveResult = {
+  name: string;
+  address: string | null;
 };
 
 export type ARCNamesConfig = {
@@ -59,7 +58,7 @@ export class ARCNames {
     this.provider = new JsonRpcProvider(config.rpcUrl);
     this.registryAddress = config.registryAddress;
     this.cacheTimeout = config.cacheTimeout ?? 60_000;
-    this.readContract = new Contract(this.registryAddress, REGISTRY_ABI, this.provider);
+    this.readContract = new Contract(this.registryAddress, ANS_REGISTRY_ABI, this.provider);
     this.signer = config.signer;
     this.writeContract = config.signer ? (this.readContract.connect(config.signer) as Contract) : undefined;
   }
@@ -124,6 +123,59 @@ export class ARCNames {
   async quotePrice(rawName: string, years = 1): Promise<bigint> {
     const name = normalizeName(rawName);
     return (await this.readContract.quotePrice(name, years)) as bigint;
+  }
+
+  async resolveWithReason(rawName: string): Promise<ResolveResult> {
+    let name: string;
+    try {
+      name = normalizeName(rawName);
+    } catch {
+      return { address: null, name: rawName, reason: "invalid_name" };
+    }
+
+    const key = `info:${name}`;
+    const cached = this.getCache<NameInfo>(key);
+    const info = cached ?? await (async () => {
+      const [owner, resolvedAddress, expiry, expired, reserved] =
+        (await this.readContract.getRecord(name)) as [string, string, bigint, boolean, boolean];
+      const result: NameInfo = {
+        name: `${name}.arc`,
+        address: resolvedAddress === ZERO_ADDRESS ? null : resolvedAddress,
+        owner: owner === ZERO_ADDRESS ? null : owner,
+        expiry: expiry === 0n ? null : Number(expiry),
+        isExpired: Boolean(expired),
+        isReserved: Boolean(reserved),
+      };
+      this.setCache(key, result);
+      return result;
+    })();
+
+    if (info.isReserved) return { address: null, name: `${name}.arc`, reason: "reserved" };
+    if (!info.owner) return { address: null, name: `${name}.arc`, reason: "not_registered" };
+    if (info.isExpired) return { address: null, name: `${name}.arc`, reason: "expired" };
+    return { address: info.address, name: `${name}.arc`, reason: "found" };
+  }
+
+  async resolveMany(rawNames: string[]): Promise<BatchResolveResult[]> {
+    const CHUNK_SIZE = 50;
+    const results: BatchResolveResult[] = [];
+
+    for (let i = 0; i < rawNames.length; i += CHUNK_SIZE) {
+      const chunk = rawNames.slice(i, i + CHUNK_SIZE);
+      const promises = chunk.map(async (raw) => {
+        try {
+          const name = normalizeName(raw);
+          const addr = await this.resolve(name);
+          return { name: `${name}.arc`, address: addr };
+        } catch {
+          return { name: raw, address: null };
+        }
+      });
+      const chunkResults = await Promise.all(promises);
+      results.push(...chunkResults);
+    }
+
+    return results;
   }
 
   async getQRCodeDataUrl(rawName: string, baseUrl = "https://arcnames.io/pay"): Promise<string> {
@@ -269,8 +321,11 @@ export function normalizeName(rawName: string): string {
   if (label.length < 3 || label.length > 32) {
     throw new Error("Name length must be between 3 and 32 characters");
   }
-  if (!/^[a-z0-9]+$/.test(label)) {
-    throw new Error("Name must use only lowercase letters and numbers");
+  if (!/^[a-z0-9-]+$/.test(label)) {
+    throw new Error("Name must use only lowercase letters, numbers, and hyphens");
+  }
+  if (label.startsWith("-") || label.endsWith("-")) {
+    throw new Error("Name cannot start or end with a hyphen");
   }
 
   return label;
