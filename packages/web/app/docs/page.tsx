@@ -83,17 +83,14 @@ export default function DocsPage() {
           </p>
           <div className="docs-grid-3 mt-lg">
             <div className="docs-info-card">
-              <span className="docs-info-emoji">&#x1F310;</span>
               <h3>Identity Layer</h3>
               <p>Replace <code>0x858f...5f4E</code> with <code>david.arc</code>. One name for payments, profiles, and discovery.</p>
             </div>
             <div className="docs-info-card">
-              <span className="docs-info-emoji">&#x1F4B0;</span>
               <h3>USDC Native</h3>
               <p>All fees paid in USDC. Gas is USDC on Arc. No ETH, no bridging, no wrapped tokens.</p>
             </div>
             <div className="docs-info-card">
-              <span className="docs-info-emoji">&#x1F916;</span>
               <h3>Agent Ready</h3>
               <p>AI agents register <code>bot-agent.arc</code> names, discover services, and pay each other autonomously.</p>
             </div>
@@ -622,17 +619,17 @@ Agent:
           <h2>Naming Rules</h2>
           <div className="docs-grid-3">
             <div className="docs-info-card">
-              <h4>&#x1F9D1; Human</h4>
+              <h4>Human</h4>
               <p><code>alice.arc</code></p>
               <p>Personal identity. No suffix required.</p>
             </div>
             <div className="docs-info-card">
-              <h4>&#x1F916; AI Agent</h4>
+              <h4>AI Agent</h4>
               <p><code>bot-agent.arc</code></p>
               <p>Must end with <code>-agent</code> suffix.</p>
             </div>
             <div className="docs-info-card">
-              <h4>&#x1F4B8; Payment App</h4>
+              <h4>Payment App</h4>
               <p><code>pay-usdc.arc</code></p>
               <p>Must end with <code>-usdc</code> suffix.</p>
             </div>

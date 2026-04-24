@@ -5,8 +5,8 @@ import { WalletProvider } from "./wallet-context";
 import NavLinks from "./nav-links";
 
 export const metadata: Metadata = {
-  title: "ARC Name Service",
-  description: "Identity layer for Arc Testnet"
+  title: ".arc",
+  description: "ARC Name Service — Identity layer for Arc Testnet"
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -16,13 +16,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
       <body suppressHydrationWarning>
         <WalletProvider>
           <header className="nav">
             <Link href="/" style={{ textDecoration: "none" }}>
-              <div className="nav-brand">
-                <span className="text-accent" style={{ fontSize: "2.2em", lineHeight: 1, display: "inline-flex", alignItems: "center", verticalAlign: "middle", marginRight: "-0.05em" }}>.</span>arc
+              <div className="nav-brand" style={{ display: "flex", alignItems: "center", gap: "0.15rem" }}>
                 <span className="badge badge-network"><span className="dot dot-blue" /> Testnet</span>
               </div>
             </Link>

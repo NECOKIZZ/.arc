@@ -445,11 +445,6 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 }
 .feature-card:hover::after { opacity: 1; }
 
-.feature-card .feature-emoji {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  display: block;
-}
 .feature-card h3 { margin-bottom: 0.5rem; }
 
 /* ═══════════════ TYPE SELECTOR (register) ═══════════════ */
@@ -479,7 +474,7 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
   background: rgba(37, 99, 235, 0.04);
   box-shadow: 0 0 0 3px var(--accent-glow);
 }
-.type-option .type-emoji { font-size: 1.75rem; display: block; margin-bottom: 0.5rem; }
+.type-option .type-icon { width: 2.5rem; height: 2.5rem; display: block; margin: 0 auto 0.5rem; object-fit: contain; }
 .type-option .type-label { font-weight: 700; font-size: 0.95rem; display: block; }
 .type-option .type-desc { font-size: 0.75rem; color: var(--text-secondary); display: block; margin-top: 0.25rem; }
 
@@ -676,7 +671,6 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 }
 .docs-info-card h3, .docs-info-card h4 { margin-bottom: 0.5rem; }
 .docs-info-card p { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.55; }
-.docs-info-emoji { font-size: 2rem; display: block; margin-bottom: 0.75rem; }
 
 .docs-cap-card {
   border: 1px solid var(--border);

@@ -21,10 +21,10 @@ const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_TOKEN_ADDRESS || ANS_USDC_ADDR
 type FlowStep = "idle" | "balance" | "approve" | "register" | "done" | "failed";
 type NameType = "human" | "agent" | "payment";
 
-const NAME_TYPES: { type: NameType; emoji: string; label: string; desc: string; suffix: string }[] = [
-  { type: "human", emoji: "\u{1F9D1}", label: "Human", desc: "Personal identity", suffix: "" },
-  { type: "agent", emoji: "\u{1F916}", label: "AI Agent", desc: "Requires -agent suffix", suffix: "-agent" },
-  { type: "payment", emoji: "\u{1F4B8}", label: "Payment App", desc: "Requires -usdc suffix", suffix: "-usdc" },
+const NAME_TYPES: { type: NameType; icon: string; label: string; desc: string; suffix: string }[] = [
+  { type: "human", icon: "/images/register/human.svg", label: "Human", desc: "Personal identity", suffix: "" },
+  { type: "agent", icon: "/images/register/agent.svg", label: "AI Agent", desc: "Requires -agent suffix", suffix: "-agent" },
+  { type: "payment", icon: "/images/register/payment.svg", label: "Payment App", desc: "Requires -usdc suffix", suffix: "-usdc" },
 ];
 
 export default function RegisterPage() {
@@ -243,7 +243,7 @@ export default function RegisterPage() {
               className={`type-option ${nameType === t.type ? "selected" : ""}`}
               onClick={() => { setNameType(t.type); setAvailable(null); setCheckedName(""); setError(null); }}
             >
-              <span className="type-emoji">{t.emoji}</span>
+              <img src={t.icon} alt={t.label} className="type-icon" />
               <span className="type-label">{t.label}</span>
               <span className="type-desc">{t.desc}</span>
             </div>

@@ -263,7 +263,7 @@ export default function DashboardPage() {
       ) : wallet ? (
         <div className="container-narrow">
           <section className="card card-glow text-center" style={{ padding: "3.5rem 1.5rem" }}>
-            <p style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>&#x1F3F7;&#xFE0F;</p>
+            <p style={{ fontSize: "2.5rem", marginBottom: "0.75rem", color: "var(--text-secondary)" }}>.arc</p>
             <p style={{ fontSize: "1.1rem", fontWeight: 600 }}>No .arc names yet</p>
             <p className="text-secondary text-sm mt-sm">Claim your identity on Arc.</p>
             <a href="/register" style={{ display: "inline-block", marginTop: "1.25rem" }}>

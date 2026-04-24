@@ -64,7 +64,7 @@ export default async function HomePage() {
             <div className="stat-label">per year</div>
           </div>
           <div className="stat-item">
-            <div className="stat-num" style={{ color: "var(--text)" }}>&#x26A1;</div>
+            <div className="stat-num" style={{ color: "var(--text)" }}>~</div>
             <div className="stat-label">instant registration</div>
           </div>
           <div className="stat-item">
@@ -81,7 +81,6 @@ export default async function HomePage() {
         <p className="section-header" style={{ textAlign: "center" }}>Built for everyone on Arc</p>
         <div className="grid grid-3">
           <div className="feature-card">
-            <span className="feature-emoji">&#x1F9D1;</span>
             <h3>Humans</h3>
             <p className="text-sm text-secondary mt-sm">
               Claim <strong>alice.arc</strong> as your on-chain identity. Share it with anyone to receive USDC instantly.
@@ -92,7 +91,6 @@ export default async function HomePage() {
           </div>
 
           <div className="feature-card">
-            <span className="feature-emoji">&#x1F916;</span>
             <h3>AI Agents</h3>
             <p className="text-sm text-secondary mt-sm">
               Register via our API with the <code>-agent</code> suffix. Give your bot an identity on Arc.
@@ -103,7 +101,6 @@ export default async function HomePage() {
           </div>
 
           <div className="feature-card">
-            <span className="feature-emoji">&#x1F4B8;</span>
             <h3>Payment Apps</h3>
             <p className="text-sm text-secondary mt-sm">
               Register with <code>-usdc</code> suffix for financial apps. Turn your app into a payment address.
