@@ -698,19 +698,24 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
 }
 .docs-copy-btn {
   position: absolute;
-  top: 0.4rem;
-  right: 0.4rem;
-  padding: 0.2rem 0.45rem;
-  font-size: 0.65rem;
+  top: 0.35rem;
+  right: 0.35rem;
+  padding: 0.15rem 0.35rem;
+  font-size: 0.6rem;
   font-weight: 600;
-  border-radius: 4px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(30,30,50,0.8);
+  border-radius: 3px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(30,30,50,0.85);
   color: #999;
   cursor: pointer;
   z-index: 1;
   transition: all var(--transition);
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: auto;
+  width: auto;
 }
 .docs-copy-btn:hover {
   color: var(--accent);
