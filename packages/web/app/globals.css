@@ -45,7 +45,7 @@ body {
   overflow-x: hidden;
 }
 
-h1, h2, h3, .nav-brand, .stat-num, .type-label, .feature-card h3 {
+h1, h2, h3, .nav-brand, .type-label, .feature-card h3 {
   font-family: "Bricolage Grotesque", system-ui, sans-serif;
 }
 
@@ -494,14 +494,6 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
   color: var(--text-tertiary); margin-bottom: 1rem;
 }
 
-/* ═══════════════ STAT BOXES ═══════════════ */
-.stat-row {
-  display: flex; gap: 1.5rem; justify-content: center;
-  flex-wrap: wrap; margin-top: 2.5rem;
-}
-.stat-item { text-align: center; }
-.stat-num { font-size: 1.75rem; font-weight: 800; color: var(--accent); letter-spacing: -0.02em; }
-.stat-label { font-size: 0.8rem; color: var(--text-secondary); font-weight: 500; }
 
 /* ═══════════════ SPACER & UTILS ═══════════════ */
 .mt-sm { margin-top: 0.5rem; }
@@ -844,7 +836,6 @@ button:disabled { opacity: 0.4; cursor: not-allowed; }
   .container { padding: 1.5rem 1rem 3rem; }
   .nav { padding: 0.75rem 1rem; }
   .type-selector { grid-template-columns: 1fr; }
-  .stat-row { gap: 1rem; }
   .docs-layout { grid-template-columns: 1fr; gap: 1rem; }
   .docs-sidebar { position: static; max-height: none; display: flex; gap: 0.5rem; flex-wrap: wrap; }
   .docs-sidebar-nav { flex-direction: row; flex-wrap: wrap; gap: 4px; }

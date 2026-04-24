@@ -58,20 +58,6 @@ export default async function HomePage() {
           </Link>
         </div>
 
-        <div className="stat-row" style={{ position: "relative", zIndex: 1 }}>
-          <div className="stat-item">
-            <div className="stat-num">$5</div>
-            <div className="stat-label">per year</div>
-          </div>
-          <div className="stat-item">
-            <div className="stat-num" style={{ color: "var(--text)" }}>~</div>
-            <div className="stat-label">instant registration</div>
-          </div>
-          <div className="stat-item">
-            <div className="stat-num">0</div>
-            <div className="stat-label">ETH needed</div>
-          </div>
-        </div>
       </section>
 
       <hr className="section-divider" />
