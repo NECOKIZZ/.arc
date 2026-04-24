@@ -23,8 +23,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <header className="nav">
             <Link href="/" style={{ textDecoration: "none" }}>
               <div className="nav-brand" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <span style={{ display: "flex", alignItems: "baseline", gap: 0, fontWeight: 700, fontSize: "1.25rem", letterSpacing: "-0.02em" }}>
-                  <span className="text-accent" style={{ fontSize: "1.65em", lineHeight: 1, display: "inline-block", transform: "translateY(0.05em)" }}>.</span>
+                <span style={{ display: "flex", alignItems: "baseline", gap: 0, fontWeight: 700, fontSize: "1.75rem", letterSpacing: "-0.02em" }}>
+                  <span className="text-accent" style={{ fontSize: "1.8em", lineHeight: 1, display: "inline-block", transform: "translateY(0.05em)" }}>.</span>
                   <span>arc</span>
                 </span>
                 <span className="badge badge-network"><span className="dot dot-blue" /> Testnet</span>
