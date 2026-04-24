@@ -1,5 +1,6 @@
 "use client";
 
+// Cache-bust: v2 — force Vercel fresh build
 import { ARCNames, normalizeName, ANS_REGISTRY_ADDRESSES, ANS_USDC_ADDRESSES, ANS_RPC_URLS, ANS_EXPLORER_URLS, USDC_ERC20_ABI } from "@arcnames/sdk";
 import { BrowserProvider, Contract, formatUnits, parseUnits, isAddress } from "ethers";
 import { useEffect, useMemo, useState } from "react";
