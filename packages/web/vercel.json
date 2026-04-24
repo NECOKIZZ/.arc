@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd ../.. && npm install && npm run build -w @arcnames/sdk && npm run build -w @arc/names-web",
+  "buildCommand": "cd ../.. && npm install && npm run build -w @arc/names-web",
   "outputDirectory": ".next",
   "framework": "nextjs",
   "installCommand": "cd ../.. && npm install"

@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@arc/names": "file:../sdk",
+    "@arcnames/sdk": "^0.2.0",
     "ethers": "^6.16.0",
     "next": "^15.2.0",
     "react": "^19.0.0",
