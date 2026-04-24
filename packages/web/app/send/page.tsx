@@ -1,7 +1,7 @@
 "use client";
 
 // Cache-bust: v2 — force Vercel fresh build
-import { ARCNames, normalizeName, ANS_REGISTRY_ADDRESSES, ANS_USDC_ADDRESSES, ANS_RPC_URLS, ANS_EXPLORER_URLS, USDC_ERC20_ABI } from "@arcnames/sdk";
+import { ARCNames, normalizeName, ANS_REGISTRY_ADDRESSES, ANS_USDC_ADDRESSES, ANS_RPC_URLS, ANS_EXPLORER_URLS } from "@arcnames/sdk";
 import { BrowserProvider, Contract, formatUnits, parseUnits, isAddress } from "ethers";
 import { useEffect, useMemo, useState } from "react";
 import { useWallet } from "../wallet-context";
@@ -13,6 +13,14 @@ const REGISTRY_ADDRESS =
   ANS_REGISTRY_ADDRESSES[ARC_CHAIN_ID] || "";
 const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_TOKEN_ADDRESS || ANS_USDC_ADDRESSES[ARC_CHAIN_ID] || "";
 const EXPLORER_BASE_URL = process.env.NEXT_PUBLIC_ARC_EXPLORER_URL || `${ANS_EXPLORER_URLS[ARC_CHAIN_ID]}/tx/` || "https://testnet.arcscan.app/tx/";
+
+/** Full USDC ERC-20 ABI for transfers (SDK exports only the subset needed for ANS registration fees) */
+const USDC_ABI = [
+  "function allowance(address owner, address spender) view returns (uint256)",
+  "function approve(address spender, uint256 amount) returns (bool)",
+  "function balanceOf(address owner) view returns (uint256)",
+  "function transfer(address to, uint256 amount) returns (bool)",
+] as const;
 
 type SendStep = "idle" | "resolving" | "confirm" | "sending" | "done" | "failed";
 
@@ -55,7 +63,7 @@ export default function SendPage() {
   async function loadBalance() {
     try {
       const provider = new BrowserProvider(window.ethereum as any);
-      const usdc = new Contract(USDC_ADDRESS, USDC_ERC20_ABI, provider);
+      const usdc = new Contract(USDC_ADDRESS, USDC_ABI, provider);
       const bal = (await usdc.balanceOf(wallet)) as bigint;
       setBalance(formatUnits(bal, 6));
     } catch {
@@ -127,7 +135,7 @@ export default function SendPage() {
     try {
       const provider = new BrowserProvider(window.ethereum as any);
       const signer = await provider.getSigner();
-      const usdc = new Contract(USDC_ADDRESS, USDC_ERC20_ABI, signer);
+      const usdc = new Contract(USDC_ADDRESS, USDC_ABI, signer);
 
       const parsedAmount = parseUnits(amount.trim(), 6);
       const bal = (await usdc.balanceOf(wallet)) as bigint;
