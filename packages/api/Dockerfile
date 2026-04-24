@@ -14,10 +14,10 @@ COPY packages/sdk/ ./packages/sdk/
 COPY packages/api/ ./packages/api/
 
 # Build SDK
-RUN npm run build -w @arc/names
+RUN npm run build -w @arcnames/sdk
 
 # Build API
-RUN npm run build -w @arc/names-api
+RUN npm run build -w @arcnames/api
 
 EXPOSE 8787
 

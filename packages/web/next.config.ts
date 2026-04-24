@@ -6,7 +6,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  transpilePackages: ["@arc/names"],
+  transpilePackages: ["@arcnames/sdk"],
   outputFileTracingRoot: path.resolve(__dirname, "../..")
 };
 

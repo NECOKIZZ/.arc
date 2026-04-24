@@ -1,15 +1,15 @@
 {
-  "name": "@arc/names-api",
+  "name": "@arcnames/api",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "npm run build -w @arc/names && tsc -p tsconfig.json",
+    "build": "npm run build -w @arcnames/sdk && tsc -p tsconfig.json",
     "start": "node dist/server.js"
   },
   "dependencies": {
-    "@arc/names": "file:../sdk",
+    "@arcnames/sdk": "file:../sdk",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",

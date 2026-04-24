@@ -5,7 +5,7 @@ import rateLimit from "express-rate-limit";
 import { LRUCache } from "lru-cache";
 import QRCode from "qrcode";
 import { Wallet, JsonRpcProvider } from "ethers";
-import { ARCNames, normalizeName, ANS_REGISTRY_ADDRESSES, ANS_RPC_URLS } from "@arc/names";
+import { ARCNames, normalizeName, ANS_REGISTRY_ADDRESSES, ANS_RPC_URLS } from "@arcnames/sdk";
 
 const ARC_CHAIN_ID = Number(process.env.ARC_CHAIN_ID || "5042002");
 const PORT = Number(process.env.PORT || "8787");
