@@ -129,28 +129,40 @@ export default function DocsPage() {
           </div>
         </section>
 
-        {/* ═══════ QUICK START ═══════ */}
+        {/* ═══════ GETTING STARTED ═══════ */}
         <section id="quickstart" className="docs-section">
-          <h2>Quick Start — 5 Minutes</h2>
-          <h3>Install</h3>
-          <CodeBlock lang="bash" code={`npm install @arcnames/sdk
-# For React hooks:
+          <h2>Getting Started</h2>
+          <p className="docs-lead">
+            Integrate .arc name resolution into any dApp in under 5 minutes. Install from npm, instantiate, and resolve.
+          </p>
+
+          <h3>Step 1 — Install</h3>
+          <CodeBlock lang="bash" code={`# Core SDK (required)
+npm install @arcnames/sdk
+
+# React hooks (optional, for React/Next.js apps)
 npm install @arcnames/sdk-react`} />
 
-          <h3 className="mt-lg">Pattern A: Resolve before sending USDC</h3>
-          <p>The most common use case — convert a .arc name to an address before sending a transaction.</p>
+          <h3 className="mt-lg">Step 2 — Instantiate</h3>
+          <p>Create a single SDK instance. All read methods cache automatically.</p>
           <CodeBlock code={`import { ARCNames } from "@arcnames/sdk";
 
 const ans = new ARCNames({
   rpcUrl: "https://rpc.testnet.arc.network",
   registryAddress: "0xf5e0E328119D16c75Fb4a001282a3a7b733EF6db",
-});
+  cacheTimeout: 60000, // optional, default 60s
+});`} />
 
-const address = await ans.resolve("david");
+          <h3 className="mt-lg">Step 3 — Resolve</h3>
+          <p>Convert any .arc name to an address instantly:</p>
+          <CodeBlock code={`const address = await ans.resolve("david");
 if (!address) throw new Error("Name not found");
+
+// Use the resolved address in any transaction
 await sendUSDC(address, amount);`} />
 
-          <h3 className="mt-lg">Pattern B: Show .arc name in your navbar (React)</h3>
+          <h3 className="mt-lg">Pattern — Show .arc names in your UI (React)</h3>
+          <p>Replace raw 0x addresses with readable names in navbars, profiles, and transaction lists.</p>
           <CodeBlock code={`import { useANSReverse } from "@arcnames/sdk-react";
 
 function Navbar({ walletAddress }) {
@@ -166,7 +178,8 @@ function Navbar({ walletAddress }) {
   );
 }`} />
 
-          <h3 className="mt-lg">Pattern C: Address input with live resolution</h3>
+          <h3 className="mt-lg">Pattern — Address input with live resolution</h3>
+          <p>Let users type <code>alice.arc</code> instead of <code>0x...</code> in any send/receive form.</p>
           <CodeBlock code={`import { useANSResolve } from "@arcnames/sdk-react";
 
 function RecipientInput({ onResolved }) {
@@ -181,7 +194,11 @@ function RecipientInput({ onResolved }) {
 
   return (
     <div>
-      <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="0x... or name.arc" />
+      <input
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="0x... or name.arc"
+      />
       {isResolving && <span>Resolving...</span>}
       {arcName && address && <span>{arcName} → {address.slice(0, 10)}...</span>}
       {reason === "not_registered" && <span>Name not found</span>}
@@ -189,13 +206,38 @@ function RecipientInput({ onResolved }) {
   );
 }`} />
 
-          <h3 className="mt-lg">Pattern D: Batch resolve for CSV payouts</h3>
+          <h3 className="mt-lg">Pattern — Batch resolve for payouts</h3>
+          <p>Resolve hundreds of names in a single multicall. Perfect for payroll, airdrops, and treasury ops.</p>
           <CodeBlock code={`const recipients = ["alice", "bob", "charlie", "david"];
 const results = await ans.resolveMany(recipients);
-// [{ name: "alice.arc", address: "0x..." }, { name: "bob.arc", address: null }, ...]
 
+// [{ name: "alice.arc", address: "0x..." }, { name: "bob.arc", address: null }, ...]
 const valid = results.filter((r) => r.address !== null);
 const failed = results.filter((r) => r.address === null);`} />
+
+          <h3 className="mt-lg">Pattern — Check availability before registering</h3>
+          <p>Pre-flight check before showing a registration form.</p>
+          <CodeBlock code={`const available = await ans.isAvailable("myname");
+if (available) {
+  const price = await ans.quotePrice("myname", 1); // 1 year in USDC (6 decimals)
+  console.log(\`Register for \${price} USDC\`);
+}`} />
+
+          <h3 className="mt-lg">Pattern — Register a name</h3>
+          <p>Requires an ethers.js signer for on-chain transactions. Auto-detects commit-reveal mode.</p>
+          <CodeBlock code={`import { BrowserProvider } from "ethers";
+
+const provider = new BrowserProvider(window.ethereum);
+const signer = await provider.getSigner();
+
+const ansWrite = new ARCNames({
+  rpcUrl: "https://rpc.testnet.arc.network",
+  registryAddress: "0xf5e0E328119D16c75Fb4a001282a3a7b733EF6db",
+  signer,
+});
+
+const txHash = await ansWrite.register("myname");
+console.log(\`Registered: https://testnet.arcscan.app/tx/\${txHash}\`);`} />
         </section>
 
         {/* ═══════ SDK ═══════ */}

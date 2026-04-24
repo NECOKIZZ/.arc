@@ -14,7 +14,7 @@
     "lint": "npm run lint --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "dev:api": "npm run build -w @arcnames/sdk && npm run dev -w @arcnames/api",
-    "dev:web": "npm run build -w @arcnames/sdk && npm run dev -w @arc/names-web",
+    "dev:web": "npm run build -w @arcnames/sdk && npm run dev -w @arcnames/web",
     "build:sdk": "npm run build -w @arcnames/sdk",
     "build:contracts": "npm run build -w @arc/contracts"
   }
